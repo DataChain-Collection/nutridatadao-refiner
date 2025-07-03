@@ -1,0 +1,12 @@
+*.pem
+*.tar.gz
+__pycache__/
+*.pyc
+
+/input/user.json
+/output/*
+!/output/.gitkeep
+.env
+
+.idea/
+.DS_Store
