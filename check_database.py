@@ -1,5 +1,11 @@
 import sqlite3
 import os
+
+# Set environment variables for local development
+os.environ["INPUT_DIR"] = os.path.join(os.getcwd(), "input")
+os.environ["OUTPUT_DIR"] = os.path.join(os.getcwd(), "output")
+
+# Now import settings after environment variables are set
 from refiner.config import settings
 
 # Conectar a la base de datos
@@ -23,7 +29,7 @@ for table in tables:
     columns = cursor.fetchall()
     for column in columns:
         print(f"  {column[1]} ({column[2]})")
-    
+
     print(f"\nDatos de muestra de {table_name}:")
     cursor.execute(f"SELECT * FROM {table_name} LIMIT 5;")
     rows = cursor.fetchall()
