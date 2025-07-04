@@ -10,7 +10,6 @@ from refiner.config import settings
 
 # Conectar a la base de datos
 db_path = os.path.join(settings.OUTPUT_DIR, 'db.libsql')
-print(db_path)
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 

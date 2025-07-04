@@ -2,44 +2,15 @@ from sqlalchemy import Column, String, ForeignKey, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 
 # Base para modelos SQLAlchemy
 Base = declarative_base()
 
 # === MODELOS SQLALCHEMY ===
 
-class MedicationDB(Base):
-    __tablename__ = "medication"
-
-    id = Column(String, primary_key=True)
-    patient_id = Column(String, ForeignKey("patient.id"), nullable=False)
-    resource_type = Column(String, default="MedicationKnowledge", nullable=False)
-
-    # Campos planos que forman parte de CodeableConcept
-    code = Column(String, nullable=False)
-    display = Column(String, nullable=False)
-    system = Column(String, nullable=False)
-    text = Column(String, nullable=False)
-
-    # Relación con PatientDB
-    patient = relationship("PatientDB", back_populates="medications")
-
-    def to_pydantic(self):
-        """Convierte el modelo ORM a un MedicationKnowledge Pydantic"""
-        return MedicationKnowledge(
-            resourceType=self.resource_type,
-            id=self.id,
-            code=CodeableConcept(
-                coding=[Coding(system=self.system, code=self.code, display=self.display)],
-                text=self.text
-            ),
-            patientId=self.patient_id
-        )
-
-
 class PatientDB(Base):
-    __tablename__ = "patient"
+    __tablename__ = "patient"  # Asegúrate de que este nombre coincida con el usado en el transformador
 
     id = Column(String, primary_key=True)
     resource_type = Column(String, default="Patient", nullable=False)
@@ -50,14 +21,20 @@ class PatientDB(Base):
     # Relación con MedicationDB
     medications = relationship("MedicationDB", back_populates="patient")
 
-    def to_pydantic(self):
-        """Convierte el modelo ORM a un Patient Pydantic"""
-        return Patient(
-            resourceType=self.resource_type,
-            id=self.id,
-            name=[HumanName(**name) for name in self.given_names],
-            telecom=[ContactPoint(**cp) for cp in self.contact_info] if self.contact_info else None
-        )
+
+class MedicationDB(Base):
+    __tablename__ = "medication"  # Asegúrate de que este nombre coincida con el usado en el transformador
+
+    id = Column(String, primary_key=True)
+    patient_id = Column(String, ForeignKey("patient.id"), nullable=False)
+    resource_type = Column(String, default="MedicationKnowledge", nullable=False)
+    code = Column(String, nullable=False)
+    display = Column(String, nullable=False)
+    system = Column(String, nullable=False)
+    text = Column(String, nullable=False)
+
+    # Relación con PatientDB
+    patient = relationship("PatientDB", back_populates="medications")
 
 
 # === MODELOS PYDANTIC ===

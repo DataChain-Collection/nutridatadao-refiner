@@ -1,21 +1,34 @@
-from typing import Dict, Any, List, Optional
+import os
+import json
 import logging
+from typing import Dict, Any, List
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-from refiner.models.fihr import (
-    PatientDB, MedicationDB,
-    Patient, MedicationKnowledge,
-    HumanName, ContactPoint, CodeableConcept, Coding
-)
+from refiner.models.fihr import Base, PatientDB, MedicationDB
+from refiner.models.fihr import Patient, MedicationKnowledge, HumanName, ContactPoint, CodeableConcept, Coding
 from refiner.transformer.base_transformer import DataTransformer
-from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
 
 class FHIRTransformer(DataTransformer):
     """
-    Transformer for FHIR resources (Patient, MedicationKnowledge, MedicationStatement).
+    Transformer for FHIR resources (Patient, MedicationKnowledge).
     """
-
+    
+    def _initialize_database(self) -> None:
+        """
+        Initialize or recreate the database and its tables.
+        Override to use FHIR models.
+        """
+        if os.path.exists(self.db_path):
+            os.remove(self.db_path)
+            logging.info(f"Deleted existing database at {self.db_path}")
+        
+        self.engine = create_engine(f'sqlite:///{self.db_path}')
+        Base.metadata.create_all(self.engine)  # Usa Base de fihr.py
+        self.Session = sessionmaker(bind=self.engine)
+        
     def transform(self, data: Dict[str, Any]) -> List:
         """
         Transform a FHIR resource dict into SQLAlchemy model instances.
@@ -31,109 +44,67 @@ class FHIRTransformer(DataTransformer):
 
         if resource_type == "Patient":
             try:
+                # Convertir a modelo Pydantic para validación
                 patient = Patient(**data)
-
-                # Extract names correctly
-                names_data = []
-                for name in patient.name:
-                    name_data = {
-                        "use": name.use,
-                        "family": name.family,
-                        "given": name.given
-                    }
-                    names_data.append(name_data)
-
-                # Extract telecom contact points
-                telecom_data = []
-                if patient.telecom:
-                    for cp in patient.telecom:
-                        telecom_data.append({
-                            "system": cp.system,
-                            "value": cp.value
-                        })
-
+                
+                # Convertir a modelo SQLAlchemy
                 patient_db = PatientDB(
                     id=patient.id,
                     resource_type=patient.resourceType,
                     family_name=patient.name[0].family if patient.name else "",
-                    given_names=names_data,
-                    contact_info=telecom_data if telecom_data else None
+                    given_names=[name.model_dump() for name in patient.name],
+                    contact_info=[cp.model_dump() for cp in patient.telecom] if patient.telecom else []
                 )
                 models.append(patient_db)
                 logger.info(f"Transformed Patient with ID: {patient.id}")
-            except ValidationError as ve:
-                logger.error(f"Validation error transforming Patient: {ve}")
-                raise
             except Exception as e:
-                logger.error(f"Unexpected error transforming Patient: {e}")
+                logger.error(f"Error transforming Patient: {e}")
                 raise
 
-        elif resource_type in ("MedicationStatement", "MedicationKnowledge"):
+        elif resource_type == "MedicationStatement":
             try:
-                # Common medication processing
-                if resource_type == "MedicationStatement":
-                    # Extract medication coding from MedicationStatement
-                    med_concept = data.get("medicationCodeableConcept", {})
-                    codings = med_concept.get("coding", [{}])
-                    first_coding = codings[0] if codings else {}
-
-                    # Build CodeableConcept
-                    codeable_concept = CodeableConcept(
-                        coding=[Coding(
-                            system=first_coding.get("system", ""),
-                            code=first_coding.get("code", ""),
-                            display=first_coding.get("display", "")
-                        )],
-                        text=med_concept.get("text", "")
-                    )
-
-                    # Extract patient reference
-                    patient_ref = data.get("subject", {}).get("reference", "")
-                    patient_id = patient_ref.split("/")[-1] if patient_ref else None
-
-                    medication = MedicationKnowledge(
-                        resourceType="MedicationKnowledge",
-                        id=data.get("id"),
-                        code=codeable_concept,
-                        patientId=patient_id
-                    )
-                else:  # MedicationKnowledge
-                    # Preprocess to ensure required fields
-                    code_data = data.get("code", {})
-                    if "coding" not in code_data or not code_data["coding"]:
-                        code_data["coding"] = [{}]
-                    if "text" not in code_data:
-                        code_data["text"] = ""
-
-                    # Extract patient ID if present
-                    patient_id = data.get("patientId")
-                    if patient_id and isinstance(patient_id, str) and "/" in patient_id:
-                        data["patientId"] = patient_id.split("/")[-1]
-
-                    medication = MedicationKnowledge(**data)
-
-                # Validate we have at least one coding
-                if not medication.code.coding:
-                    medication.code.coding.append(Coding(system="", code="", display=""))
-
-                first_coding = medication.code.coding[0]
-
+                # Convertir MedicationStatement a formato compatible con MedicationKnowledge
+                med_concept = data.get("medicationCodeableConcept", {})
+                coding = med_concept.get("coding", [{}])[0] if med_concept.get("coding") else {}
+                
+                # Crear un CodeableConcept con Coding
+                codeable_concept = CodeableConcept(
+                    coding=[
+                        Coding(
+                            system=coding.get("system", ""),
+                            code=coding.get("code", ""),
+                            display=coding.get("display", "")
+                        )
+                    ],
+                    text=med_concept.get("text", "")
+                )
+                
+                # Extraer patient_id del subject.reference
+                patient_ref = data.get("subject", {}).get("reference", "")
+                patient_id = patient_ref.split("/")[-1] if patient_ref else "unknown"
+                
+                # Crear MedicationKnowledge
+                medication = MedicationKnowledge(
+                    resourceType="MedicationKnowledge",
+                    id=data.get("id", ""),
+                    code=codeable_concept,
+                    patientId=patient_id
+                )
+                
+                # Convertir a modelo SQLAlchemy
                 medication_db = MedicationDB(
                     id=medication.id,
-                    patient_id=medication.patientId or "unknown",
+                    patient_id=medication.patientId,
                     resource_type=medication.resourceType,
-                    code=first_coding.code,
-                    display=first_coding.display,
-                    system=first_coding.system,
+                    code=medication.code.coding[0].code,
+                    display=medication.code.coding[0].display,
+                    system=medication.code.coding[0].system,
                     text=medication.code.text
                 )
                 models.append(medication_db)
-                logger.info(f"Transformed {resource_type} with ID: {medication.id}")
-            except ValidationError as ve:
-                logger.error(f"Validation error transforming {resource_type}: {ve}")
-                raise
+                logger.info(f"Transformed MedicationStatement with ID: {medication.id}")
             except Exception as e:
-                logger.error(f"Unexpected error transforming {resource_type}: {e}")
+                logger.error(f"Error transforming MedicationStatement: {e}")
                 raise
         else:
             logger.warning(f"Unsupported resource type: {resource_type}")
