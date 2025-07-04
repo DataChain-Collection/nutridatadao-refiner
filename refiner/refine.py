@@ -4,7 +4,7 @@ import os
 
 from refiner.models.offchain_schema import OffChainSchema
 from refiner.models.output import Output
-from refiner.transformer.user_transformer import UserTransformer
+from refiner.transformer.fhir_transformer import FHIRTransformer
 from refiner.config import settings
 from refiner.utils.encrypt import encrypt_file
 from refiner.utils.ipfs import upload_file_to_ipfs, upload_json_to_ipfs
@@ -25,28 +25,28 @@ class Refiner:
                 with open(input_file, 'r') as f:
                     input_data = json.load(f)
 
-                    # Transform account data
-                    transformer = UserTransformer(self.db_path)
+                    # Transform FHIR data
+                    transformer = FHIRTransformer(self.db_path)
                     transformer.process(input_data)
                     logging.info(f"Transformed {input_filename}")
-                    
-                    # Create a schema based on the SQLAlchemy schema
+
+                    # Create a schema based on the FHIR schema
                     schema = OffChainSchema(
                         name=settings.SCHEMA_NAME,
                         version=settings.SCHEMA_VERSION,
                         description=settings.SCHEMA_DESCRIPTION,
                         dialect=settings.SCHEMA_DIALECT,
-                        schema=transformer.get_schema()
+                        schema=transformer.get_schema() if hasattr(transformer, "get_schema") else ""
                     )
                     output.schema = schema
-                        
+
                     # Upload the schema to IPFS
                     schema_file = os.path.join(settings.OUTPUT_DIR, 'schema.json')
                     with open(schema_file, 'w') as f:
                         json.dump(schema.model_dump(), f, indent=4)
                         schema_ipfs_hash = upload_json_to_ipfs(schema.model_dump())
                         logging.info(f"Schema uploaded to IPFS with hash: {schema_ipfs_hash}")
-                    
+
                     # Encrypt and upload the database to IPFS
                     encrypted_path = encrypt_file(settings.REFINEMENT_ENCRYPTION_KEY, self.db_path)
                     ipfs_hash = upload_file_to_ipfs(encrypted_path)
