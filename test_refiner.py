@@ -12,8 +12,8 @@ def setup_test_environment():
     os.makedirs("test_input", exist_ok=True)
     os.makedirs("test_output", exist_ok=True)
 
-    # Create a sample FHIR file
-    fhir_example = {
+    # Create a sample FHIR patient file
+    patient_example = {
         "resourceType": "Patient",
         "id": "example-patient-1",
         "name": [
@@ -30,9 +30,47 @@ def setup_test_environment():
             }
         ]
     }
-    
+
+    # Create a sample FHIR medication statement
+    medication_example = {
+        "resourceType": "MedicationStatement",
+        "id": "med-1",
+        "subject": {
+            "reference": "Patient/example-patient-1"
+        },
+        "status": "active",
+        "medicationCodeableConcept": {
+            "coding": [
+                {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "1049502",
+                    "display": "Acetaminophen 325 MG Oral Tablet"
+                }
+            ],
+            "text": "Acetaminophen 325 MG Oral Tablet"
+        }
+    }
+
+    # Create a FHIR bundle with both resources
+    bundle_example = {
+        "resourceType": "Bundle",
+        "type": "collection",
+        "entry": [
+            {"resource": patient_example},
+            {"resource": medication_example}
+        ]
+    }
+
+    # Write individual files
     with open("test_input/patient.json", "w") as f:
-        json.dump(fhir_example, f)
+        json.dump(patient_example, f)
+
+    with open("test_input/medication.json", "w") as f:
+        json.dump(medication_example, f)
+
+    # Write bundle file
+    with open("test_input/bundle.json", "w") as f:
+        json.dump(bundle_example, f)
 
     # Save original settings
     original_input = settings.INPUT_DIR
@@ -41,7 +79,7 @@ def setup_test_environment():
     # Modify configuration for testing
     settings.INPUT_DIR = "test_input"
     settings.OUTPUT_DIR = "test_output"
-    
+
     yield
 
     # Restore original settings
@@ -72,12 +110,109 @@ def test_refiner_transform(setup_test_environment):
     assert output.schema is not None
     assert output.schema.name == settings.SCHEMA_NAME
     assert output.schema.version == settings.SCHEMA_VERSION
-    
+
     print(f"Refinement URL: {output.refinement_url}")
     print(f"Schema: {output.schema}")
 
-    # Optional: Check the contents of the output.json file
+    # Check the contents of the output.json file
     with open(os.path.join("test_output", "output.json"), "r") as f:
         output_json = json.load(f)
         assert "refinement_url" in output_json
         assert "schema" in output_json
+
+def test_refiner_database_content(setup_test_environment):
+    """Test that the database contains the expected data."""
+    # Run the refiner
+    refiner = Refiner()
+    output = refiner.transform()
+
+    # Import SQLite to check database content
+    import sqlite3
+
+    # Connect to the database
+    db_path = os.path.join("test_output", "db.libsql")
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Check that the patient table exists and has the expected data
+    cursor.execute("SELECT COUNT(*) FROM patient")
+    patient_count = cursor.fetchone()[0]
+    assert patient_count == 1, f"Expected 1 patient, found {patient_count}"
+
+    cursor.execute("SELECT id, family_name FROM patient")
+    patient = cursor.fetchone()
+    assert patient[0] == "example-patient-1"
+    assert patient[1] == "Smith"
+
+    # Check that the medication table exists and has the expected data
+    cursor.execute("SELECT COUNT(*) FROM medication")
+    medication_count = cursor.fetchone()[0]
+    assert medication_count == 1, f"Expected 1 medication, found {medication_count}"
+
+    cursor.execute("SELECT id, patient_id, code, display FROM medication")
+    medication = cursor.fetchone()
+    assert medication[0] == "med-1"
+    assert medication[1] == "example-patient-1"
+    assert medication[2] == "1049502"
+    assert medication[3] == "Acetaminophen 325 MG Oral Tablet"
+
+    # Close the connection
+    conn.close()
+
+def test_refiner_bundle_processing(setup_test_environment):
+    """Test that the refiner can process a FHIR bundle."""
+    # Run the refiner
+    refiner = Refiner()
+    output = refiner.transform()
+
+    # Import SQLite to check database content
+    import sqlite3
+
+    # Connect to the database
+    db_path = os.path.join("test_output", "db.libsql")
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Check that both resources from the bundle were processed
+    cursor.execute("SELECT COUNT(*) FROM patient")
+    patient_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM medication")
+    medication_count = cursor.fetchone()[0]
+
+    # We expect at least one of each since we have individual files and a bundle
+    assert patient_count >= 1, f"Expected at least 1 patient, found {patient_count}"
+    assert medication_count >= 1, f"Expected at least 1 medication, found {medication_count}"
+
+    # Close the connection
+    conn.close()
+
+def test_refiner_schema_structure(setup_test_environment):
+    """Test that the generated schema has the expected structure."""
+    # Run the refiner
+    refiner = Refiner()
+    output = refiner.transform()
+
+    # Load the schema.json file
+    with open(os.path.join("test_output", "schema.json"), "r") as f:
+        schema = json.load(f)
+
+    # Check that the schema has the expected tables
+    tables = [table["name"] for table in schema["tables"]]
+    assert "patient" in tables, "Schema should include patient table"
+    assert "medication" in tables, "Schema should include medication table"
+
+    # Check that the schema has the expected relationships
+    relationships = schema.get("relationships", [])
+    relationship_names = [rel["name"] for rel in relationships]
+    assert "patient_medications" in relationship_names, "Schema should include patient_medications relationship"
+
+    # Find the medication table and check its columns
+    medication_table = next((table for table in schema["tables"] if table["name"] == "medication"), None)
+    assert medication_table is not None
+
+    # Check that the medication table has the expected columns
+    column_names = [col["name"] for col in medication_table["columns"]]
+    expected_columns = ["id", "patient_id", "resource_type", "code", "display", "system", "text"]
+    for col in expected_columns:
+        assert col in column_names, f"Medication table should have {col} column"
