@@ -42,7 +42,15 @@ class DataTransformer:
         """
         raise NotImplementedError("Subclasses must implement transform method")
     
-    def get_schema(self):
+    def get_schema(self) -> Dict[str, Any]:
+        """
+        Get the database schema as a dictionary.
+        
+        Returns:
+            Dictionary containing the schema definition with tables and relationships
+        """
+        # This is the default implementation that returns SQL schema as string
+        # Subclasses should override this method to return a proper dictionary
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
