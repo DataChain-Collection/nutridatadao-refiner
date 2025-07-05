@@ -97,6 +97,72 @@ docker run \
   refiner
 ```
 
+## Testing
+
+This project includes several methods for testing the data refinement process with the database:
+
+### Manual Testing
+
+You can run manual tests using the provided scripts:
+
+#### Using `run_manual_test.py`
+
+This script sets up the environment and runs the refiner with test data:
+
+```bash
+python run_manual_test.py
+```
+
+The script will:
+1. Create input and output directories if they don't exist
+2. Set environment variables for the refiner
+3. Process any JSON files in the input directory
+4. Output the refinement URL and database schema
+
+#### Using `run_test.sh`
+
+For a more comprehensive test that includes data generation:
+
+```bash
+./run_test.sh
+```
+
+This shell script will:
+1. Generate test FHIR data using `create_test_data.py`
+2. Run the refiner on the generated data
+3. Display the results and any errors
+
+### Creating Test Data
+
+You can generate sample FHIR data for testing:
+
+```bash
+python create_test_data.py
+```
+
+This will create sample Patient and MedicationStatement resources in the input directory.
+
+### Database Inspection
+
+After running tests, you can inspect the SQLite database in the output directory:
+
+```bash
+sqlite3 output/refined.db
+```
+
+Common commands:
+- `.tables` - List all tables
+- `.schema` - Show database schema
+- `SELECT * FROM patient;` - View patient data
+- `SELECT * FROM medication;` - View medication data
+
+### Troubleshooting
+
+If you encounter database errors:
+1. Check that the table names in your models match those in your transformers
+2. Ensure the Base class is properly imported from the correct module
+3. Verify that the database is being initialized before data insertion
+
 ## Contributing
 
 If you have suggestions for improving this template, please open an issue or submit a pull request.
