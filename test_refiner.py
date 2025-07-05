@@ -108,12 +108,12 @@ def test_refiner_transform(setup_test_environment):
     assert output.refinement_url.startswith(settings.IPFS_GATEWAY_URL)
 
     # Verify that the schema was generated correctly
-    assert output.schema is not None
-    assert output.schema.name == settings.SCHEMA_NAME
-    assert output.schema.version == settings.SCHEMA_VERSION
+    assert output.schema_content is not None
+    assert output.schema_content.name == settings.SCHEMA_NAME
+    assert output.schema_content.version == settings.SCHEMA_VERSION
 
     print(f"Refinement URL: {output.refinement_url}")
-    print(f"Schema: {output.schema}")
+    print(f"Schema: {output.schema_content}")
 
     # Check the contents of the output.json file
     with open(os.path.join("output", "output.json"), "r") as f:

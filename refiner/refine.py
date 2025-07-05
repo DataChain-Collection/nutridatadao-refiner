@@ -66,7 +66,7 @@ class Refiner:
                         dialect=settings.SCHEMA_DIALECT,
                         schema=transformer.get_schema() if hasattr(transformer, "get_schema") else ""
                     )
-                    output.schema = schema
+                    output.schema_content = schema
 
                     schema_file = os.path.join(settings.OUTPUT_DIR, 'schema.json')
                     with open(schema_file, 'w') as f:
