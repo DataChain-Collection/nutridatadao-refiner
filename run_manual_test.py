@@ -17,4 +17,7 @@ output = refiner.transform()
 
 # Print results
 print(f"Refinement URL: {output.refinement_url}")
-print(f"Schema: {output.schema}")
+print(f"Schema name: {output.schema.name}")
+print(f"Schema version: {output.schema.version}")
+print(f"Tables: {[table.name for table in output.schema.tables]}")
+print(f"Relationships: {[rel.name for rel in output.schema.relationships]}")
