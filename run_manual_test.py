@@ -4,17 +4,17 @@ import os
 os.environ["INPUT_DIR"] = os.path.join(os.getcwd(), "input")
 os.environ["OUTPUT_DIR"] = os.path.join(os.getcwd(), "output")
 
-# Asegúrate de que los directorios existan
+# Make sure the directories exist
 os.makedirs(os.environ["INPUT_DIR"], exist_ok=True)
 os.makedirs(os.environ["OUTPUT_DIR"], exist_ok=True)
 
-# Ahora importa el Refiner después de configurar las variables de entorno
+# Now import the Refiner after setting the environment variables
 from refiner.refine import Refiner
 
-# Ejecutar el refinador
+# Run the refiner
 refiner = Refiner()
 output = refiner.transform()
 
-# Imprimir resultados
+# Print results
 print(f"Refinement URL: {output.refinement_url}")
 print(f"Schema: {output.schema}")

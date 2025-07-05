@@ -7,12 +7,12 @@ from refiner.config import settings
 
 @pytest.fixture
 def setup_test_environment():
-    """Prepara el entorno de prueba con datos de ejemplo."""
-    # Crear directorios de prueba
+    """Prepare the test environment with sample data."""
+    # Create test directories
     os.makedirs("test_input", exist_ok=True)
     os.makedirs("test_output", exist_ok=True)
-    
-    # Crear un archivo FHIR de ejemplo
+
+    # Create a sample FHIR file
     fhir_example = {
         "resourceType": "Patient",
         "id": "example-patient-1",
@@ -33,50 +33,50 @@ def setup_test_environment():
     
     with open("test_input/patient.json", "w") as f:
         json.dump(fhir_example, f)
-    
-    # Guardar configuración original
+
+    # Save original settings
     original_input = settings.INPUT_DIR
     original_output = settings.OUTPUT_DIR
-    
-    # Modificar configuración para pruebas
+
+    # Modify configuration for testing
     settings.INPUT_DIR = "test_input"
     settings.OUTPUT_DIR = "test_output"
     
     yield
-    
-    # Restaurar configuración original
+
+    # Restore original settings
     settings.INPUT_DIR = original_input
     settings.OUTPUT_DIR = original_output
-    
-    # Limpiar directorios de prueba
+
+    # Clean up test directories
     shutil.rmtree("test_input", ignore_errors=True)
     shutil.rmtree("test_output", ignore_errors=True)
 
 def test_refiner_transform(setup_test_environment):
-    """Prueba el flujo completo de transformación."""
-    # Ejecutar el refinador
+    """Test the complete transformation flow."""
+    # Run the refiner
     refiner = Refiner()
     output = refiner.transform()
-    
-    # Verificar que se generaron los archivos esperados
+
+    # Verify that the expected files were generated
     assert os.path.exists(os.path.join("test_output", "schema.json"))
     assert os.path.exists(os.path.join("test_output", "db.libsql"))
     assert os.path.exists(os.path.join("test_output", "db.libsql.pgp"))
     assert os.path.exists(os.path.join("test_output", "output.json"))
-    
-    # Verificar que el output tiene la URL de refinamiento
+
+    # Verify that the output has the refinement URL
     assert output.refinement_url is not None
     assert output.refinement_url.startswith(settings.IPFS_GATEWAY_URL)
-    
-    # Verificar que el schema se generó correctamente
+
+    # Verify that the schema was generated correctly
     assert output.schema is not None
     assert output.schema.name == settings.SCHEMA_NAME
     assert output.schema.version == settings.SCHEMA_VERSION
     
     print(f"Refinement URL: {output.refinement_url}")
     print(f"Schema: {output.schema}")
-    
-    # Opcional: verificar el contenido del archivo output.json
+
+    # Optional: Check the contents of the output.json file
     with open(os.path.join("test_output", "output.json"), "r") as f:
         output_json = json.load(f)
         assert "refinement_url" in output_json

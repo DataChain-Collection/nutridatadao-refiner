@@ -1,5 +1,5 @@
-# Instalar pytest si no está instalado
+# Install pytest if not installed
 pip install pytest
 
-# Ejecutar la prueba
+# Run the test
 pytest -xvs test_refiner.py
