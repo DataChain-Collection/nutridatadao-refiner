@@ -42,7 +42,7 @@ class DataTransformer:
         """
         raise NotImplementedError("Subclasses must implement transform method")
     
-    def get_schema(self) -> Dict[str, Any]:
+    def get_schema(self):
         """
         Get the database schema as a dictionary.
         
