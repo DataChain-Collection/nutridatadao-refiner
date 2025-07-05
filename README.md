@@ -109,6 +109,8 @@ You can run manual tests using the provided scripts:
 
 This script sets up the environment and runs the refiner with test data:
 
+> Note: First run `python create_test_data.py` to create test data, and then `python run_manual_test.py` to run the refiner.
+
 ```bash
 python run_manual_test.py
 ```
@@ -120,6 +122,10 @@ The script will:
 4. Output the refinement URL and database schema
 
 #### Using `run_test.sh`
+
+```shell
+chmod +x run_test.sh
+```
 
 For a more comprehensive test that includes data generation:
 
