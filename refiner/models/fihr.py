@@ -4,26 +4,26 @@ from sqlalchemy.orm import relationship
 from pydantic import BaseModel
 from typing import List, Optional
 
-# Base para modelos SQLAlchemy
+# Base for SQLAlchemy models
 Base = declarative_base()
 
-# === MODELOS SQLALCHEMY ===
+# === SQLALCHEMY MODELS ===
 
 class PatientDB(Base):
-    __tablename__ = "patient"  # Asegúrate de que este nombre coincida con el usado en el transformador
+    __tablename__ = "patient"  # This name must match the one used in the transformer
 
     id = Column(String, primary_key=True)
     resource_type = Column(String, default="Patient", nullable=False)
     family_name = Column(String, nullable=False)
-    given_names = Column(JSON, nullable=False)  # Almacena una lista de objetos {use, family, given}
-    contact_info = Column(JSON, nullable=True)  # Almacena una lista de objetos {system, value}
+    given_names = Column(JSON, nullable=False) # Stores a list of {use, family, given} objects
+    contact_info = Column(JSON, nullable=True) # Stores a list of {system, value} objects
 
-    # Relación con MedicationDB
+    # Relationship with MedicationDB
     medications = relationship("MedicationDB", back_populates="patient")
 
 
 class MedicationDB(Base):
-    __tablename__ = "medication"  # Asegúrate de que este nombre coincida con el usado en el transformador
+    __tablename__ = "medication"  # This name must match the one used in the transformer
 
     id = Column(String, primary_key=True)
     patient_id = Column(String, ForeignKey("patient.id"), nullable=False)
@@ -33,11 +33,11 @@ class MedicationDB(Base):
     system = Column(String, nullable=False)
     text = Column(String, nullable=False)
 
-    # Relación con PatientDB
+    # Relationship with PatientDB
     patient = relationship("PatientDB", back_populates="medications")
 
 
-# === MODELOS PYDANTIC ===
+# === PYDANTIC MODELS ===
 
 class HumanName(BaseModel):
     use: Optional[str] = None
