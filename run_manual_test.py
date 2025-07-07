@@ -14,28 +14,45 @@ os.makedirs(os.environ["INPUT_DIR"], exist_ok=True)
 os.makedirs(os.environ["OUTPUT_DIR"], exist_ok=True)
 
 # Create a sample FHIR resource if input directory is empty
-sample_file = os.path.join(os.environ["INPUT_DIR"], "sample.json")
 if not os.listdir(os.environ["INPUT_DIR"]) or not any(f.endswith('.json') for f in os.listdir(os.environ["INPUT_DIR"])):
-    logging.info("Creating sample FHIR resource")
-    sample_data = {
-        "resourceType": "Patient",
-        "id": "example-patient-1",
-        "name": [
-            {
-                "family": "Smith",
-                "given": ["John"]
-            }
-        ],
-        "telecom": [
-            {
-                "system": "phone",
-                "value": "555-1234",
-                "use": "home"
-            }
-        ]
-    }
-    with open(sample_file, 'w') as f:
-        json.dump(sample_data, f, indent=2)
+    logging.info("No FHIR data found in input directory")
+
+    # Check if create_test_data.py exists
+    if os.path.exists("create_test_data.py"):
+        logging.info("Generating test FHIR data using create_test_data.py...")
+        try:
+            import subprocess
+            result = subprocess.run(["python", "create_test_data.py"], capture_output=True, text=True)
+            if result.returncode == 0:
+                logging.info("Successfully generated test FHIR data")
+            else:
+                logging.error(f"Error generating test data: {result.stderr}")
+        except Exception as e:
+            logging.error(f"Failed to run create_test_data.py: {e}")
+    else:
+        logging.warning("create_test_data.py not found.")
+
+        # Create a minimal sample as fallback
+        logging.info("Creating minimal sample FHIR resource as fallback")
+        sample_data = {
+            "resourceType": "Patient",
+            "id": "example-patient-1",
+            "name": [
+                {
+                    "family": "Smith",
+                    "given": ["John"]
+                }
+            ],
+            "telecom": [
+                {
+                    "system": "phone",
+                    "value": "555-1234",
+                    "use": "home"
+                }
+            ]
+        }
+        with open(os.path.join(os.environ["INPUT_DIR"], "sample.json"), 'w') as f:
+            json.dump(sample_data, f, indent=2)
 
 # Now import the Refiner after setting the environment variables
 from refiner.refine import Refiner
