@@ -1,0 +1,221 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "example-patient-1",
+        "name": [
+          {
+            "use": "official",
+            "family": "Smith",
+            "given": [
+              "John"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-1234"
+          },
+          {
+            "system": "email",
+            "value": "john.smith@example.com"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1970-01-01",
+        "address": [
+          {
+            "use": "home",
+            "line": [
+              "123 Main St"
+            ],
+            "city": "Anytown",
+            "state": "CA",
+            "postalCode": "12345",
+            "country": "USA"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "example-patient-2",
+        "name": [
+          {
+            "use": "official",
+            "family": "Johnson",
+            "given": [
+              "Sarah"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-5678"
+          },
+          {
+            "system": "email",
+            "value": "sarah.johnson@example.com"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1985-05-15"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "med-1",
+        "subject": {
+          "reference": "Patient/example-patient-1"
+        },
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "310965",
+              "display": "Lisinopril 10 MG Oral Tablet"
+            }
+          ],
+          "text": "Lisinopril 10 MG Oral Tablet"
+        },
+        "effectiveDateTime": "2025-06-10T21:38:43Z",
+        "dateAsserted": "2025-07-06T21:38:43Z",
+        "dosage": [
+          {
+            "text": "Take 1 tablet by mouth as needed",
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "route": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "26643006",
+                  "display": "Oral route"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "med-2",
+        "subject": {
+          "reference": "Patient/example-patient-1"
+        },
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "197318",
+              "display": "Ibuprofen 200 MG Oral Tablet"
+            }
+          ],
+          "text": "Ibuprofen 200 MG Oral Tablet"
+        },
+        "effectiveDateTime": "2025-06-14T21:38:43Z",
+        "dateAsserted": "2025-07-06T21:38:43Z",
+        "dosage": [
+          {
+            "text": "Take 1 tablet by mouth as needed",
+            "timing": {
+              "repeat": {
+                "frequency": 2,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "route": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "26643006",
+                  "display": "Oral route"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "med-3",
+        "subject": {
+          "reference": "Patient/example-patient-1"
+        },
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "314076",
+              "display": "Simvastatin 20 MG Oral Tablet"
+            }
+          ],
+          "text": "Simvastatin 20 MG Oral Tablet"
+        },
+        "effectiveDateTime": "2025-06-12T21:38:43Z",
+        "dateAsserted": "2025-07-06T21:38:43Z",
+        "dosage": [
+          {
+            "text": "Take 1 tablet by mouth twice daily",
+            "timing": {
+              "repeat": {
+                "frequency": 2,
+                "period": 1,
+                "periodUnit": "d"
+              }
+            },
+            "route": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "26643006",
+                  "display": "Oral route"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "med-4",
+        "subject": {
+          "reference": "Patient/example-patient-2"
+        },
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "197318",
+              "display": "Ibuprofen 200 MG Oral Tablet"
+            }
+          ],
+          "text": "Ibuprofen 200 MG Oral Tablet"
+        }
+      }
+    }
+  ]
+}

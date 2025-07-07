@@ -163,17 +163,17 @@ medication_examples.append({
     }
 })
 
-# Save the patient files to the input directory
-with open(os.path.join(input_dir, "patient1.json"), "w") as f:
-    json.dump(patient_example, f, indent=2)
-
-with open(os.path.join(input_dir, "patient2.json"), "w") as f:
-    json.dump(patient_example2, f, indent=2)
-
-# Save each medication to a separate file
-for i, med in enumerate(medication_examples):
-    with open(os.path.join(input_dir, f"medication{i+1}.json"), "w") as f:
-        json.dump(med, f, indent=2)
+# # Save the patient files to the input directory
+# with open(os.path.join(input_dir, "patient1.json"), "w") as f:
+#     json.dump(patient_example, f, indent=2)
+# 
+# with open(os.path.join(input_dir, "patient2.json"), "w") as f:
+#     json.dump(patient_example2, f, indent=2)
+# 
+# # Save each medication to a separate file
+# for i, med in enumerate(medication_examples):
+#     with open(os.path.join(input_dir, f"medication{i+1}.json"), "w") as f:
+#         json.dump(med, f, indent=2)
 
 # Create a bundle with all resources for testing bulk processing
 bundle = {
