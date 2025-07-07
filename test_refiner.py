@@ -99,9 +99,10 @@ def test_refiner_transform(setup_test_environment):
     # Verify that the expected files were generated
     assert os.path.exists(os.path.join("test_output", "schema.json"))
     assert os.path.exists(os.path.join("test_output", "db.libsql"))
-    # Comment out or remove this line if PGP is not implemented
-    # assert os.path.exists(os.path.join("test_output", "db.libsql.pgp"))
-    assert os.path.exists(os.path.join("output", "output.json"))
+
+    # Verify that the output.json file exists in the correct directory
+    output_path = os.path.join("output", "output.json")
+    assert os.path.exists(output_path), f"Output file not found at {output_path}"
 
     # Verify that the output has the refinement URL
     assert output.refinement_url is not None
@@ -116,7 +117,7 @@ def test_refiner_transform(setup_test_environment):
     print(f"Schema: {output.schema_content}")
 
     # Check the contents of the output.json file
-    with open(os.path.join("output", "output.json"), "r") as f:
+    with open(output_path, "r") as f:
         output_json = json.load(f)
         assert "refinement_url" in output_json
         assert "schema" in output_json
