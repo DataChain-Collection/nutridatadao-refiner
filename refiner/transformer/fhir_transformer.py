@@ -208,11 +208,33 @@ class FHIRTransformer(DataTransformer):
         """
         models = self.transform(data)
         session = self.Session()
+    
         try:
+            # Use a set to track already processed IDs
+            processed_ids = set()
+    
             for model in models:
+                # Check if this model already exists in the database or in the current batch
+                if hasattr(model, 'id'):
+                    # If the ID has already been processed in this batch, skip it.
+                    if model.id in processed_ids:
+                        logger.info(f"Skipping duplicate model with ID: {model.id}")
+                        continue
+    
+                    # Check if it already exists in the database
+                    existing = session.query(model.__class__).filter_by(id=model.id).first()
+                    if existing:
+                        logger.info(f"Skipping existing model with ID: {model.id}")
+                        continue
+    
+                        # Mark this ID as processed
+                    processed_ids.add(model.id)
+    
+                # Add the model to the session
                 session.add(model)
+    
             session.commit()
-            logger.info(f"Saved {len(models)} models to database")
+            logger.info(f"Saved {len(processed_ids)} models to database")
         except Exception as e:
             session.rollback()
             logger.error(f"Error saving to database: {e}")
