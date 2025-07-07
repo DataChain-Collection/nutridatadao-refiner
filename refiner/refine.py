@@ -1,9 +1,7 @@
 import json
 import logging
 import os
-from typing import List
 
-from refiner.models.fihr import MedicationDB, PatientDB
 from refiner.models.offchain_schema import OffChainSchema
 from refiner.models.output import Output
 from refiner.transformer.fhir_transformer import FHIRTransformer
