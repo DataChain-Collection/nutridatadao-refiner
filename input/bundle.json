@@ -80,20 +80,20 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "310965",
-              "display": "Lisinopril 10 MG Oral Tablet"
+              "code": "197319",
+              "display": "Amoxicillin 500 MG Oral Capsule"
             }
           ],
-          "text": "Lisinopril 10 MG Oral Tablet"
+          "text": "Amoxicillin 500 MG Oral Capsule"
         },
-        "effectiveDateTime": "2025-06-10T21:38:43Z",
-        "dateAsserted": "2025-07-06T21:38:43Z",
+        "effectiveDateTime": "2025-06-24T22:11:59Z",
+        "dateAsserted": "2025-07-06T22:11:59Z",
         "dosage": [
           {
             "text": "Take 1 tablet by mouth as needed",
             "timing": {
               "repeat": {
-                "frequency": 1,
+                "frequency": 2,
                 "period": 1,
                 "periodUnit": "d"
               }
@@ -123,20 +123,20 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "197318",
-              "display": "Ibuprofen 200 MG Oral Tablet"
+              "code": "314076",
+              "display": "Simvastatin 20 MG Oral Tablet"
             }
           ],
-          "text": "Ibuprofen 200 MG Oral Tablet"
+          "text": "Simvastatin 20 MG Oral Tablet"
         },
-        "effectiveDateTime": "2025-06-14T21:38:43Z",
-        "dateAsserted": "2025-07-06T21:38:43Z",
+        "effectiveDateTime": "2025-06-26T22:11:59Z",
+        "dateAsserted": "2025-07-06T22:11:59Z",
         "dosage": [
           {
-            "text": "Take 1 tablet by mouth as needed",
+            "text": "Take 1 tablet by mouth twice daily",
             "timing": {
               "repeat": {
-                "frequency": 2,
+                "frequency": 1,
                 "period": 1,
                 "periodUnit": "d"
               }
@@ -166,14 +166,14 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "314076",
-              "display": "Simvastatin 20 MG Oral Tablet"
+              "code": "197319",
+              "display": "Amoxicillin 500 MG Oral Capsule"
             }
           ],
-          "text": "Simvastatin 20 MG Oral Tablet"
+          "text": "Amoxicillin 500 MG Oral Capsule"
         },
-        "effectiveDateTime": "2025-06-12T21:38:43Z",
-        "dateAsserted": "2025-07-06T21:38:43Z",
+        "effectiveDateTime": "2025-06-26T22:11:59Z",
+        "dateAsserted": "2025-07-06T22:11:59Z",
         "dosage": [
           {
             "text": "Take 1 tablet by mouth twice daily",
@@ -209,11 +209,11 @@
           "coding": [
             {
               "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-              "code": "197318",
-              "display": "Ibuprofen 200 MG Oral Tablet"
+              "code": "310965",
+              "display": "Lisinopril 10 MG Oral Tablet"
             }
           ],
-          "text": "Ibuprofen 200 MG Oral Tablet"
+          "text": "Lisinopril 10 MG Oral Tablet"
         }
       }
     }
